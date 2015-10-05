@@ -1,0 +1,11 @@
+{
+  "name": "libermarcadores",
+  "version": "1.0.0",
+  "description": "Modulo para agregar al servidor una api de libermarcadores en la dirección \"/libermarcadores\"",
+  "main": "route.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Martín Weingart",
+  "license": "GPL-3.0"
+}

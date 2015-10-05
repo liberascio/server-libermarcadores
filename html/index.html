@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Prueba</title>
+
+  </head>
+
+  <body>
+    <div id="principal">
+        Path: <input type="text" id="path">
+        Nombre: <input type="text" id="nombre">
+       <ul>
+         <li><button id="obtener-espacios">Obtener Espacios</button></li>
+         <li><button id="obtener-espacio">Obtener Espacio</button></li>
+         <li><button id="agregar-espacio">Agregar Espacio</button></li>
+         <li><button id="modificar-espacio">Modificar Espacio</button></li>
+         <li><button id="borrar-espacio">Borrar Espacio</button></li>
+         <br></br>
+         <li><button id="obtener-marcadores">Obtener Marcadores</button></li>
+         <li><button id="obtener-marcador">Obtener Marcador</button></li>
+         <li><button id="agregar-marcador">Agregar Marcador</button></li>
+         <li><button id="modificar-marcador">Modificar Marcador</button></li>
+         <li><button id="borrar-marcador">Borrar Marcador</button></li>
+
+       </ul>
+    </div>
+
+    <script>
+        var Request = function(opciones) {
+            request = this.request = new XMLHttpRequest(); 
+            var async = (opciones.async!=undefined) ? opciones.async : true;
+            request.open(opciones.metodo,opciones.url,async);
+            var header = (opciones.header!=undefined) ? opciones.header : "";
+            Object.keys(header).forEach(function(head) {
+                request.setRequestHeader(head,header[head]);
+            });    
+            var datos = (opciones.datos!=undefined) ? opciones.datos : "";
+            request.send(datos);
+            request.onreadystatechange = function() {
+                if (this.readyState==4 && this.status=="200") {
+                    opciones.fin(this.responseText);
+                }
+            }
+        } 
+        
+        NodeList.prototype.forEach = Array.prototype.forEach;
+        var principal = document.getElementById('principal');
+        
+        principal.querySelector('ul').addEventListener('click',function(evento) {
+            var path = document.getElementById('path').value ;
+            var url = "https://localhost:8000/libermarcadores/rest/" + path;
+            var nombre = document.getElementById('nombre').value;
+           
+            console.log(url);
+            switch(evento.target.id) {
+                case "obtener-espacios": new Request({
+                    metodo: 'GET',
+                    url: url,
+                    header: {"Content-type": "application/json;charset=UTF-8",
+                            "Authorization": "Basic " + btoa("martin:123")
+                    },
+                    fin: function(resp) {
+                        var respuesta = JSON.parse(resp);
+                        console.log(respuesta);
+                    }
+                });break;
+                
+                case "obtener-espacio": new Request({
+                    metodo: 'GET',
+                    url: url + "/" + nombre,
+                    header: {"Content-type": "application/json;charset=UTF-8",
+                            "Authorization": "Basic " + btoa("martin:123")
+                    },
+                    fin: function(resp) {
+                        var respuesta = JSON.parse(resp);
+                        console.log(respuesta);
+                    }
+                });break;   
+                
+                case "agregar-espacio": new Request({
+                    metodo: 'POST',
+                    url: url,
+                    datos: JSON.stringify({nombre:nombre}),
+                    header: {"Content-type": "application/json;charset=UTF-8",
+                            "Authorization": "Basic " + btoa("martin:123")
+                    },
+                    fin: function(resp) {
+                        var respuesta = JSON.parse(resp);
+                        console.log(respuesta);
+                    }
+                });break;       
+                
+                case "modificar-espacio": new Request({
+                    metodo: 'PUT',
+                    url: url + "/" + nombre,
+                    datos: JSON.stringify({path:path, subespacios:["superprueba"]}),
+                    header: {"Content-type": "application/json;charset=UTF-8",
+                            "Authorization": "Basic " + btoa("martin:123")
+                    },
+                    fin: function(resp) {
+                        var respuesta = JSON.parse(resp);
+                        console.log(respuesta);
+                    }
+                });break;                 
+
+                case "borrar-espacio": new Request({
+                    metodo: 'DELETE',
+                    url: url + "espacios" + "/" + nombre,
+                    header: {"Content-type": "application/json;charset=UTF-8"},
+                    fin: function(resp) {
+                        var respuesta = JSON.parse(resp);
+                        console.log(respuesta);
+                    }
+                });break;                 
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                case "obtener-marcadores": new Request({
+                    metodo: 'GET',
+                    url: url + "marcadores",
+                    header: {"Content-type": "application/json;charset=UTF-8",
+                            "Authorization": "Basic " + btoa("martin:123")
+                    },                    fin: function(resp) {
+                        var respuesta = JSON.parse(resp);
+                        console.log(respuesta);
+                    }
+                });break;
+                
+                case "obtener-marcador": new Request({
+                    metodo: 'GET',
+                    url: url + "marcadores" + "/" + nombre,
+                    header: {"Content-type": "application/json;charset=UTF-8",
+                            "Authorization": "Basic " + btoa("martin:123")
+                    },                    fin: function(resp) {
+                        var respuesta = JSON.parse(resp);
+                        console.log(respuesta);
+                    }
+                });break;   
+                
+                case "agregar-marcador": new Request({
+                    metodo: 'POST',
+                    url: url + "marcadores",
+                    datos: JSON.stringify({url:'https://www.prueba.com.ar', etiquetas:['web','prueba'], descripcion:'Marcador de prueba',titulo: 'Pagina de Prueba'}),
+                    header: {"Content-type": "application/json;charset=UTF-8",
+                            "Authorization": "Basic " + btoa("martin:123")
+                    },                    fin: function(resp) {
+                        var respuesta = JSON.parse(resp);
+                        console.log(respuesta);
+                    }
+                });break;       
+                
+                case "modificar-marcador": new Request({
+                    metodo: 'PUT',
+                    url: url + "marcadores" + "/" + nombre,
+                    datos: JSON.stringify({path:path, nombre:'nuevoesp', admin: 'mweingart', usuarios: ['mweingart','nhuenchuman']}),
+                    header: {"Content-type": "application/json;charset=UTF-8",
+                            "Authorization": "Basic " + btoa("martin:123")
+                    },                    fin: function(resp) {
+                        var respuesta = JSON.parse(resp);
+                        console.log(respuesta);
+                    }
+                });break;                 
+
+                case "borrar-marcador": new Request({
+                    metodo: 'DELETE',
+                    url: url + "marcadores" + "/" + nombre,
+                    header: {"Content-type": "application/json;charset=UTF-8",
+                            "Authorization": "Basic " + btoa("martin:123")
+                    },                    fin: function(resp) {
+                        var respuesta = JSON.parse(resp);
+                        console.log(respuesta);
+                    }
+                });break;                     
+            }
+        });
+    </script>       
+  </body>
+</html>
+
