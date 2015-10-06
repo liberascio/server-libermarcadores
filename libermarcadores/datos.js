@@ -84,14 +84,13 @@ var verificarPermiso = function(usuario, espacio, tipo, callback) {
 //EN CASO DE EXITO LLAMA AL CALLBACK CON EL ESPACIO ENCONTRADO
 //ESTA FUNCION CONDENSA LAS DOS ANTERIORES Y HAGO LAS DOS VERIFICACIONES EN UNA
 var verificarEspacio = function(pathEspacio,usuario,tipo,callback) {
-    var pathEsp = (pathEspacio.search('.')==0) ? 'root.' + pathEspacio : pathEspacio;
+        console.log(pathEspacio)
+    var pathEsp = (pathEspacio.search('.')==0 && pathEspacio!="root") ? 'root.' + pathEspacio : pathEspacio;
     var query = {path:pathEsp, permisos:{$elemMatch: {usuario: usuario}}};
     if (tipo == "usuario")
        query.permisos.$elemMatch.$or = [{tipo: "admin"},{tipo:"usuario"}]
     else
        query.permisos.$elemMatch.tipo = "admin";
-       
-    console.log("Consula espacio:",query);
 
     database.collection(colEspacios)
         .find(query)
@@ -221,7 +220,6 @@ module.exports.eliminarEspacio = function(credencial, pathEspacio, callback) {
 module.exports.marcadores = function(credencial, pathEspacio, callback) {
     autenticarUsuario(credencial, function() {
         verificarEspacio(pathEspacio,credencial.name,'usuario', function(err,espacio) {
-            console.log("Espacio: ",espacio);
             if (err)
 
                 callback(err)
@@ -253,10 +251,8 @@ module.exports.obtenerMarcador = function(credencial, pathEspacio, id, callback)
 module.exports.agregarMarcador = function(credencial, pathEspacio, marcador,callback) {
     autenticarUsuario(credencial, function() {
         verificarEspacio(pathEspacio,credencial.name,'usuario', function(err,espacio) {
-            console.log("\n\n\nAgrego al espacio:",espacio);
             marcador.creador = credencial.name;
             marcador.id = new ObjectId();
-            console.log("\nel marcador",marcador);
             database.collection(colEspacios).update({_id:espacio._id}, {$push:{marcadores:marcador}},
                 function(err, result){
                     if (!err) 
