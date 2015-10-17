@@ -81,22 +81,18 @@ router.get('/js/:script', function(req,res) {
 /* -------------- ROUTING REST ------------ */
 //api de espacios
 router.get('/rest/:path/', function(req,res) {
-    var pathEspacio = req.params.path;
-    var nivel = (req.query.nivel) ? parseInt(req.query.nivel) : 0;
-    espacios.espacios(req.credenciales, pathEspacio, nivel, 
-        function(err,result) {
-            if (err) {
-                res.statusCode = err.code;
-                res.send({error:err.mensaje, detalle:err.detalle});
-                res.end();
-            }
-            else {
-                res.statusCode = 200;
-                res.send(result);
-                res.end();                
-            }
-        }
-    );
+    var pathEspacio = req.params.path, nivel = (req.query.nivel) ? parseInt(req.query.nivel) : 0;
+    espacios.espacios(req.credenciales, pathEspacio, nivel)
+    .then( function(result) {
+        res.statusCode = 200;
+        res.send(result);
+        res.end();    
+    })
+    .catch( function(err) {     
+        res.statusCode = err.code;
+        res.send(err);
+        res.end();
+    });
 });
 
 /*
@@ -120,17 +116,16 @@ router.get('/rest/:path/:nombre', function(req,res) {
 router.post('/rest/:path/', function(req,res) {
     var pathPadre = req.params.path;
     var espacioNuevo = req.body;
-    espacios.agregarEspacio(req.credenciales, pathPadre, espacioNuevo, function(err,result) {
-        if (err) {
-            res.statusCode = err.code;
-            res.send({error:err.mensaje, detalle:err.detalle});
-            res.end();
-        }
-        else {
-            res.statusCode = 200;
-            res.send(result);
-            res.end();                
-        }
+    espacios.agregarEspacio(req.credenciales, pathPadre, espacioNuevo)
+    .then(function(result) {
+        res.statusCode = 200;
+        res.send(result);
+        res.end(); 
+    })    
+    .catch(function(err) {
+        res.statusCode = err.code;
+        res.send(err);
+        res.end();    
     });
 });
 
@@ -140,7 +135,7 @@ router.put('/rest/:path/', function(req,res) {
     espacios.modificarEspacio(req.credenciales, pathEspacio, espacio, function(err,result) {
         if (err) {
             res.statusCode = err.code;
-            res.send({error:err.mensaje, detalle:err.detalle});
+            res.send(err);
             res.end();
         }
         else {
@@ -152,112 +147,103 @@ router.put('/rest/:path/', function(req,res) {
 });
 
 router.delete('/rest/:path/', function(req,res) {
-    var pathPadre = req.params.path;
-    var nombre = req.params.nombre;
-    if (pathPadre==undefined) pathPadre = ".";
-    espacios.eliminarEspacio(req.credenciales,pathPadre,function(err,result) {
-        if (err) {
-            res.statusCode = err.code;
-            res.send({error:err.mensaje, detalle:err.detalle});
-            res.end();
-        }
-        else {
-            res.statusCode = 200;
-            res.send(result);
-            res.end();                
-        }
+    var pathEspacio = req.params.path, nombre = req.params.nombre;
+    espacios.eliminarEspacio(req.credenciales, pathEspacio)
+    .then( function(result) {
+        res.statusCode = 200;
+        res.send(result);
+        res.end();      
     })
+    .catch( function(err) {
+        res.statusCode = err.code;
+        res.send(err);
+        res.end();    
+    });
 });
 
 //api de marcadores
 router.get('/rest/:path/marcadores/', function(req, res) {
     var path = req.params.path;
-    espacios.marcadores(req.credenciales, path, function(err,result) {
-        if (err) {
-            res.statusCode = err.code;
-            res.send({error:err.mensaje, detalle:err.detalle});
-            res.end();
-        }
-        else {
-            res.statusCode = 200;
-            res.send(result);
-            res.end();                
-        }
+    espacios.marcadores(req.credenciales, path)
+    .then( function(result) {
+        res.send(result);
+        res.end();      
     })
+    .catch( function(err) {
+        res.send(err);
+        res.end();    
+    });    
 });
 
 router.get('/rest/:path/marcadores/:id', function(req,res) {
     var path = req.params.path;
     var id = req.params.id;
-    espacios.obtenerMarcador(req.credenciales, path, id, function(err,result) {
-        if (err) {
-            res.statusCode = err.code;
-            res.send({error:err.mensaje, detalle:err.detalle});
-            res.end();
-        }
-        else {
-            res.statusCode = 200;
-            res.send(result);
-            res.end();                
-        }
-    });      
+    espacios.obtenerMarcador(req.credenciales, path, id)
+    .then( function(result) {
+        res.statusCode = 200;
+        res.send(result);
+        res.end();      
+    })
+    .catch( function(err) {
+        res.statusCode = err.code;
+        res.send(err);
+        res.end();    
+    });          
 });
 
 router.post('/rest/:path/marcadores/', function(req,res) {
     var path = req.params.path;
     var marcador = req.body;
-    espacios.agregarMarcador(req.credenciales, path, marcador,function(err,result) {
-        if (err) {
-            res.statusCode = err.code;
-            res.send({error:err.mensaje, detalle:err.detalle});
-            res.end();
-        }
-        else {
-            res.statusCode = 200;
-            res.send(result);
-            res.end();                
-        }
-    });
+    espacios.agregarMarcador(req.credenciales, path, marcador)
+    .then( function(result) {
+        res.send(result);
+        res.end();      
+    })
+    .catch( function(err) {
+        res.send(err);
+        res.end();    
+    });    
 });
 
 router.put('/rest/:path/marcadores/:id', function(req,res) {
     var path = req.params.path;
     var id = req.params.id;
     var marcador = req.body;
-    espacios.modificarMarcador(req.credenciales, path, id, marcador, function(err,result) {
-        if (err) {
-            res.statusCode = err.code;
-            res.send({error:err.mensaje, detalle:err.detalle});
-            res.end();
-        }
-        else {
-            res.statusCode = 200;
-            res.send(result);
-            res.end();                
-        }
-    });      
+    espacios.modificarMarcador(req.credenciales, path, id, marcador)
+    .then( function(result) {
+        res.statusCode = 200;
+        res.send(result);
+        res.end();      
+    })
+    .catch( function(err) {
+        res.statusCode = err.code;
+        res.send(err);
+        res.end();    
+    });         
 });
 
 router.delete('/rest/:path/marcadores/:id', function(req,res) {
     var path = req.params.path;
     var id = req.params.id;
-    espacios.eliminarMarcador(req.credenciales, path, id, function(err,result) {
-        if (err) {
-            res.statusCode = err.code;
-            res.send({error:err.mensaje, detalle:err.detalle});
-            res.end();
-        }
-        else {
-            res.statusCode = 200;
-            res.send(result);
-            res.end();                
-        }
-    });      
+    espacios.eliminarMarcador(req.credenciales, path, id)
+    .then( function(result) {
+        res.statusCode = 200;
+        res.send(result);
+        res.end();      
+    })
+    .catch( function(err) {
+        res.statusCode = err.code;
+        res.send(err);
+        res.end();    
+    });         
 });
 
 
 //EXPORTO EL ROUTER
 module.exports = router;
-module.exports.configBD = function(options) {
-   return espacios.configBD(options); 
+module.exports.configBD = function(options,callback) {
+   return espacios.configBD(options,callback); 
+}
+module.exports.initDB = function(admin) {
+   return espacios.initDB(admin); 
 }

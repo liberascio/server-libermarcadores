@@ -107,7 +107,7 @@
 
                 case "borrar-espacio": new Request({
                     metodo: 'DELETE',
-                    url: url + "espacios" + "/" + nombre,
+                    url: url,
                     header: {"Content-type": "application/json;charset=UTF-8"},
                     fin: function(resp) {
                         var respuesta = JSON.parse(resp);
