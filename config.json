@@ -3,9 +3,5 @@
     "port": 8000,
     "mongo-host": "localhost",
     "mongo-port": 27017,
-    "ssl": "./ssl/contacts",
-    "superadmin": {
-        "username": "martin",
-        "pass": "123"
-    }
+    "ssl": "./ssl/contacts"
 }

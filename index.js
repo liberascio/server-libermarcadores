@@ -4,6 +4,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var https = require('https');
 var fs = require('fs');
+var argv = require('minimist')(process.argv.slice(2));
 var app = express();
 
 app.use(express.static('html'));
@@ -21,8 +22,15 @@ libermarcadores.configBD({
     url: config['mongo-host']+":"+config['mongo-port']
 }, function(err,result) {
 
-    if (process.argv[2] == '-init')
-        libermarcadores.initDB(config.superadmin);
+    console.log(argv);
+
+    if (argv['init']) {
+        if (argv['admin'] && argv['pass']) {
+            libermarcadores.initDB({username:argv['username'], pass:argv['pass']});        
+        }
+        else
+            console.log("No se han especificado datos del admin. Ej: --user=martin --pass=123");
+    } 
 
     app.use('/libermarcadores', libermarcadores);
 
