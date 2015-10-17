@@ -9,22 +9,34 @@
 
   <body>
     <div id="principal">
-        Path: <input type="text" id="path">
-        Nombre: <input type="text" id="nombre">
-       <ul>
-         <li><button id="obtener-espacios">Obtener Espacios</button></li>
-         <li><button id="obtener-espacio">Obtener Espacio</button></li>
-         <li><button id="agregar-espacio">Agregar Espacio</button></li>
-         <li><button id="modificar-espacio">Modificar Espacio</button></li>
-         <li><button id="borrar-espacio">Borrar Espacio</button></li>
-         <br></br>
-         <li><button id="obtener-marcadores">Obtener Marcadores</button></li>
-         <li><button id="obtener-marcador">Obtener Marcador</button></li>
-         <li><button id="agregar-marcador">Agregar Marcador</button></li>
-         <li><button id="modificar-marcador">Modificar Marcador</button></li>
-         <li><button id="borrar-marcador">Borrar Marcador</button></li>
-
-       </ul>
+        <ul id="menu">
+            <li><a href="#" id='menu-espacios'>Espacios</a></li>
+            <li><a href="#" id='menu-usuarios'>Usuarios</a></li>            
+        </ul>
+       
+       <div id="views">
+           <div id="view-espacios" class='view' style="display:none">
+                Path: <input type="text" id="path-espacio">
+                Nombre: <input type="text" id="nombre-espacio">
+               <ul>
+                 <li><button id="obtener-espacios">Obtener Espacios</button></li>
+                 <li><button id="obtener-espacio">Obtener Espacio</button></li>
+                 <li><button id="agregar-espacio">Agregar Espacio</button></li>
+                 <li><button id="borrar-espacio">Borrar Espacio</button></li>
+               </ul>      
+           </div>
+           
+           <div id="view-usuarios" class='view' style="display:none">
+                Nombre: <input type="text" id="nombre-usuario">
+                Pass: <input type="text" id="pass-usuario">
+               <ul>
+                 <li><button id="obtener-usuarios">Obtener Usuarios</button></li>
+                 <li><button id="obtener-usuario">Obtener Usuario</button></li>
+                 <li><button id="agregar-usuario">Agregar Usuario</button></li>
+                 <li><button id="borrar-usuario">Borrar Usuario</button></li>
+               </ul>      
+           </div>       
+       </div>
     </div>
 
     <script>
@@ -45,19 +57,35 @@
             }
         } 
         
-        NodeList.prototype.forEach = Array.prototype.forEach;
-        var principal = document.getElementById('principal');
+        document.getElementById('menu').addEventListener('click', function(event) {
+            if (event.target.id=='menu-espacios') {
+                document.getElementById('view-espacios').style.display = 'block';
+                document.getElementById('view-usuarios').style.display = 'none';                
+            }
+            else if (event.target.id=='menu-usuarios') {
+                document.getElementById('view-espacios').style.display = 'none';
+                document.getElementById('view-usuarios').style.display = 'block';                            
+            }
+        });
         
-        principal.querySelector('ul').addEventListener('click',function(evento) {
-            var path = document.getElementById('path').value ;
-            var url = "https://localhost:8000/libermarcadores/rest/" + path;
-            var nombre = document.getElementById('nombre').value;
+        NodeList.prototype.forEach = Array.prototype.forEach;
+        var views = document.getElementById('views');
+        
+        
+        
+        views.addEventListener('click',function(evento) {
+            var path = (document.getElementById('path-espacio').value) ? document.getElementById('path-espacio').value : 'root',
+                urlEspacio = "https://localhost:8000/libermarcadores/rest/espacios/" + path,
+                urlUsuario = "https://localhost:8000/libermarcadores/rest/usuarios",
+                nombre = document.getElementById('nombre-espacio').value,
+                nombreUsuario = document.getElementById('nombre-usuario').value,
+                passUsuario = document.getElementById('pass-usuario').value;
            
-            console.log(url);
+            console.log(urlEspacio);
             switch(evento.target.id) {
                 case "obtener-espacios": new Request({
                     metodo: 'GET',
-                    url: url,
+                    url: urlEspacio,
                     header: {"Content-type": "application/json;charset=UTF-8",
                             "Authorization": "Basic " + btoa("martin:123")
                     },
@@ -69,7 +97,7 @@
                 
                 case "obtener-espacio": new Request({
                     metodo: 'GET',
-                    url: url + "/" + nombre,
+                    url: urlEspacio + "/" + nombre,
                     header: {"Content-type": "application/json;charset=UTF-8",
                             "Authorization": "Basic " + btoa("martin:123")
                     },
@@ -81,7 +109,7 @@
                 
                 case "agregar-espacio": new Request({
                     metodo: 'POST',
-                    url: url,
+                    url: urlEspacio,
                     datos: JSON.stringify({nombre:nombre}),
                     header: {"Content-type": "application/json;charset=UTF-8",
                             "Authorization": "Basic " + btoa("martin:123")
@@ -92,9 +120,10 @@
                     }
                 });break;       
                 
+                /*
                 case "modificar-espacio": new Request({
                     metodo: 'PUT',
-                    url: url + "/" + nombre,
+                    url: urlEspacio + "/" + nombre,
                     datos: JSON.stringify({path:path, subespacios:["superprueba"]}),
                     header: {"Content-type": "application/json;charset=UTF-8",
                             "Authorization": "Basic " + btoa("martin:123")
@@ -103,17 +132,17 @@
                         var respuesta = JSON.parse(resp);
                         console.log(respuesta);
                     }
-                });break;                 
+                });break;   */              
 
                 case "borrar-espacio": new Request({
                     metodo: 'DELETE',
-                    url: url,
+                    url: urlEspacio,
                     header: {"Content-type": "application/json;charset=UTF-8"},
                     fin: function(resp) {
                         var respuesta = JSON.parse(resp);
                         console.log(respuesta);
                     }
-                });break;                 
+                });break;         
                 
                 
                 
@@ -121,65 +150,66 @@
                 
                 
                 
-                
-                
-                
-                case "obtener-marcadores": new Request({
+                case "obtener-usuarios": new Request({
                     metodo: 'GET',
-                    url: url + "marcadores",
+                    url: urlUsuario,
                     header: {"Content-type": "application/json;charset=UTF-8",
                             "Authorization": "Basic " + btoa("martin:123")
-                    },                    fin: function(resp) {
+                    },
+                    fin: function(resp) {
                         var respuesta = JSON.parse(resp);
                         console.log(respuesta);
                     }
                 });break;
-                
-                case "obtener-marcador": new Request({
+
+                case "obtener-usuario": new Request({
                     metodo: 'GET',
-                    url: url + "marcadores" + "/" + nombre,
+                    url: urlUsuario + "/" + nombreUsuario,
                     header: {"Content-type": "application/json;charset=UTF-8",
                             "Authorization": "Basic " + btoa("martin:123")
-                    },                    fin: function(resp) {
+                    },
+                    fin: function(resp) {
                         var respuesta = JSON.parse(resp);
                         console.log(respuesta);
                     }
                 });break;   
-                
-                case "agregar-marcador": new Request({
+                             
+                case "agregar-usuario": new Request({
                     metodo: 'POST',
-                    url: url + "marcadores",
-                    datos: JSON.stringify({url:'https://www.prueba.com.ar', etiquetas:['web','prueba'], descripcion:'Marcador de prueba',titulo: 'Pagina de Prueba'}),
+                    url: urlUsuario,
+                    datos: JSON.stringify({username:nombreUsuario, pass:passUsuario}),
                     header: {"Content-type": "application/json;charset=UTF-8",
                             "Authorization": "Basic " + btoa("martin:123")
-                    },                    fin: function(resp) {
+                    },
+                    fin: function(resp) {
                         var respuesta = JSON.parse(resp);
                         console.log(respuesta);
                     }
                 });break;       
-                
-                case "modificar-marcador": new Request({
+/*
+                case "modificar-usuario": new Request({
                     metodo: 'PUT',
-                    url: url + "marcadores" + "/" + nombre,
-                    datos: JSON.stringify({path:path, nombre:'nuevoesp', admin: 'mweingart', usuarios: ['mweingart','nhuenchuman']}),
+                    url: url + "/" + nombreUsuario,
+                    datos: JSON.stringify({path:path, subespacios:["superprueba"]}),
                     header: {"Content-type": "application/json;charset=UTF-8",
                             "Authorization": "Basic " + btoa("martin:123")
-                    },                    fin: function(resp) {
+                    },
+                    fin: function(resp) {
                         var respuesta = JSON.parse(resp);
                         console.log(respuesta);
                     }
-                });break;                 
+                });break;   */              
 
-                case "borrar-marcador": new Request({
+                case "borrar-usuario": new Request({
                     metodo: 'DELETE',
-                    url: url + "marcadores" + "/" + nombre,
-                    header: {"Content-type": "application/json;charset=UTF-8",
-                            "Authorization": "Basic " + btoa("martin:123")
-                    },                    fin: function(resp) {
+                    url: urlUsuario + "/" + nombreUsuario,
+                    header: {"Content-type": "application/json;charset=UTF-8"},
+                    fin: function(resp) {
                         var respuesta = JSON.parse(resp);
                         console.log(respuesta);
                     }
-                });break;                     
+                });break;                                      
+                              
             }
         });
     </script>       

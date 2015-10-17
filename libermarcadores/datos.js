@@ -74,25 +74,12 @@ var existeUsuario  = function(colUsuarios, credenciales) {
             .find({"username":username,"pass":pass})
                 .toArray(function(err, result){
                     if (!err && (result.length==1)) 
-                        resolve(result);   
+                        resolve(result[0]);   
                     else
                         reject({code:403, msg:'Acceso prohibido: no existe el usuario', error:err});
         });     
     });
 }    
-
-//VERIFICO EL USUARIO Y CONTRASEÑA EN LA BASE DE DATOS
-var autenticarUsuario = function(credenciales,callback) {
-    console.log("Autentico usuario: ",credenciales);
-    database.collection(colUsuarios)
-        .find({"username":credenciales.name,"pass":credenciales.pass})
-            .toArray(function(err, result){
-                if (!err && (result.length==1)) 
-                    callback(null,result);   
-                else
-                    callback({code:403, msg:'Acceso prohibido: no existe el usuario', error:err});
-    });  
-}
 
 //VERIFICO SI EXISTE EL ESPACIO
 var existeEspacio = function(colEspacios, pathEspacio) {
@@ -108,48 +95,6 @@ var existeEspacio = function(colEspacios, pathEspacio) {
         });         
     });   
 }
-
-/*
-//VERIFICO SI EXISTEN LOS PERMISOS EN EL ESPACIO
-var verificarPermiso = function(usuario, espacio, tipo, callback) {
-    console.log("Verifico permiso: ",tipo,": ",usuario," en espacio:",espacio);
-    var query = {"username":usuario, "espacio":espacio}; 
-    if (tipo == "usuario")
-       query.$or = [{"tipo":"admin"},{"tipo":"usuario"}];
-    else
-       query.tipo = "admin";     
-    database.collection('permisos')
-        .find(query)
-            .toArray(function(err, result){
-                if (!err && (result.length>0)) 
-                    callback(null,result);    
-                else
-                    callback({code:403, msg:'Acceso prohibido: usuario inexistente', error:err});
-    });    
-}*/
-
-/*
-//VERIFICA SI EXISTE EL ESPACIO Y SI EL USUARIO TIENE PERMISOS
-//EN CASO DE EXITO LLAMA AL CALLBACK CON EL ESPACIO ENCONTRADO
-//ESTA FUNCION CONDENSA LAS DOS ANTERIORES Y HAGO LAS DOS VERIFICACIONES EN UNA
-var verificarEspacio = function(pathEspacio,usuario,tipo,callback) {
-    var pathEsp = (pathEspacio.search('.')==0 && pathEspacio!="root") ? 'root.' + pathEspacio : pathEspacio;
-    var query = {path:pathEsp, permisos:{$elemMatch: {username: usuario}}};
-    if (tipo == "usuario")
-       query.permisos.$elemMatch.$or = [{tipo: "admin"},{tipo:"usuario"}]
-    else
-       query.permisos.$elemMatch.tipo = "admin";
-
-    database.collection(colEspacios)
-        .find(query)
-            .toArray(function(err, result){
-                if (!err && (result.length==1)) {
-                    callback(null,result[0]);   
-                }
-                else
-                    callback({code:404, msg:'No existe el espacio o el usuario no tiene permisos', error:err});
-    });    
-}*/
 
 String.prototype.obtenerPadre = function () {
     return this.substring(0,this.lastIndexOf('.'));
@@ -169,6 +114,7 @@ function verificarPermiso(usuario, espacio, tipo) {
         }).length>0)
     }
 }
+
 
 
 
@@ -461,6 +407,101 @@ module.exports.eliminarMarcador = function(credencial, pathEspacio, id, callback
             }
             
         })
+        .catch(function(err) {
+            reject(err);
+        });        
+    });     
+}
+
+
+/* -------------------------------- API USUARIOS ---------------------------------*/
+
+// Obtener todos los usuarios 
+module.exports.usuarios = function(credencial) {    
+    return new Promise(function(resolve, reject) {
+        existeUsuario(colUsuarios, credencial)
+        .then( function(usuarioResult) {
+                  if (usuarioResult.super) {
+                    database.collection(colUsuarios).find({},{username:true, pass:true}).toArray(
+                        function(err, result){
+                            if (!err) 
+                                resolve({code:200, result:result, msg:'OK'});    
+                            else
+                                reject({code:500, msg:'No se pudieron obtener los usuarios', error:err});		
+                    });                   
+                  }
+                  else 
+                      reject({code:401, msg:'Usuario sin permisos necesario'})
+         })
+        .catch(function(err) {
+            reject(err);
+        });        
+    });     
+}
+
+// Obtener usuario
+module.exports.usuario = function(credencial, nombre) {    
+    return new Promise(function(resolve, reject) {
+        existeUsuario(colUsuarios, credencial)
+        .then( function(usuarioResult) {
+                  if (usuarioResult.super) {
+                    database.collection(colUsuarios).find({username:nombre},{username:true, pass:true}).toArray(
+                        function(err, result){
+                            if (!err && result.length>0) 
+                                resolve({code:200, result:result[0], msg:'OK'});    
+                            else
+                                reject({code:500, msg:'Error al recuperar usuario', error:err});		
+                    });                   
+                  }
+                  else 
+                      reject({code:401, msg:'Usuario sin permisos necesario'})
+         })
+        .catch(function(err) {
+            reject(err);
+        });        
+    });     
+}
+
+// Agregar usuario
+module.exports.agregarUsuario = function(credencial, usuario) {    
+    return new Promise(function(resolve, reject) {
+        existeUsuario(colUsuarios, credencial)
+        .then( function(usuarioResult) {
+                  if (usuarioResult.super) {
+                    database.collection(colUsuarios).insertOne(usuario, 
+                        function(err, result){
+                            if (!err) 
+                                resolve({code:200, msg:'OK'});    
+                            else
+                                reject({code:500, msg:'Error al agregar usuario', error:err});		
+                    });                   
+                  }
+                  else 
+                      reject({code:401, msg:'Usuario sin permisos necesario'})
+         })
+        .catch(function(err) {
+            reject(err);
+        });        
+    });     
+}
+
+// Eliminar usuario
+module.exports.eliminarUsuario = function(credencial, username) {    
+    return new Promise(function(resolve, reject) {
+        existeUsuario(colUsuarios, credencial)
+        .then( function(usuarioResult) {
+                  if (usuarioResult.super) {
+                    database.collection(colUsuarios).remove({username:username}, 
+                        function(err, result){
+                            if (!err) 
+                                resolve({code:200, msg:'OK'});    
+                            else
+                                reject({code:500, msg:'Error al eliminar usuario', error:err});		
+                    });                   
+                  }
+                  else 
+                      reject({code:401, msg:'Usuario sin permisos necesario'})
+         })
         .catch(function(err) {
             reject(err);
         });        

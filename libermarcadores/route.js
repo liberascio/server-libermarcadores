@@ -80,7 +80,7 @@ router.get('/js/:script', function(req,res) {
 
 /* -------------- ROUTING REST ------------ */
 //api de espacios
-router.get('/rest/:path/', function(req,res) {
+router.get('/rest/espacios/:path/', function(req,res) {
     var pathEspacio = req.params.path, nivel = (req.query.nivel) ? parseInt(req.query.nivel) : 0;
     espacios.espacios(req.credenciales, pathEspacio, nivel)
     .then( function(result) {
@@ -113,7 +113,7 @@ router.get('/rest/:path/:nombre', function(req,res) {
     });
 });*/
 
-router.post('/rest/:path/', function(req,res) {
+router.post('/rest/espacios/:path/', function(req,res) {
     var pathPadre = req.params.path;
     var espacioNuevo = req.body;
     espacios.agregarEspacio(req.credenciales, pathPadre, espacioNuevo)
@@ -129,7 +129,7 @@ router.post('/rest/:path/', function(req,res) {
     });
 });
 
-router.put('/rest/:path/', function(req,res) {
+router.put('/rest/espacios/:path/', function(req,res) {
     var pathEspacio = req.params.path;
     var espacio = req.body;
     espacios.modificarEspacio(req.credenciales, pathEspacio, espacio, function(err,result) {
@@ -146,7 +146,7 @@ router.put('/rest/:path/', function(req,res) {
     })
 });
 
-router.delete('/rest/:path/', function(req,res) {
+router.delete('/rest/espacios/:path/', function(req,res) {
     var pathEspacio = req.params.path, nombre = req.params.nombre;
     espacios.eliminarEspacio(req.credenciales, pathEspacio)
     .then( function(result) {
@@ -162,7 +162,7 @@ router.delete('/rest/:path/', function(req,res) {
 });
 
 //api de marcadores
-router.get('/rest/:path/marcadores/', function(req, res) {
+router.get('/rest/espacios/:path/marcadores/', function(req, res) {
     var path = req.params.path;
     espacios.marcadores(req.credenciales, path)
     .then( function(result) {
@@ -175,7 +175,7 @@ router.get('/rest/:path/marcadores/', function(req, res) {
     });    
 });
 
-router.get('/rest/:path/marcadores/:id', function(req,res) {
+router.get('/rest/espacios/:path/marcadores/:id', function(req,res) {
     var path = req.params.path;
     var id = req.params.id;
     espacios.obtenerMarcador(req.credenciales, path, id)
@@ -191,7 +191,7 @@ router.get('/rest/:path/marcadores/:id', function(req,res) {
     });          
 });
 
-router.post('/rest/:path/marcadores/', function(req,res) {
+router.post('/rest/espacios/:path/marcadores/', function(req,res) {
     var path = req.params.path;
     var marcador = req.body;
     espacios.agregarMarcador(req.credenciales, path, marcador)
@@ -205,7 +205,7 @@ router.post('/rest/:path/marcadores/', function(req,res) {
     });    
 });
 
-router.put('/rest/:path/marcadores/:id', function(req,res) {
+router.put('/rest/espacios/:path/marcadores/:id', function(req,res) {
     var path = req.params.path;
     var id = req.params.id;
     var marcador = req.body;
@@ -222,10 +222,84 @@ router.put('/rest/:path/marcadores/:id', function(req,res) {
     });         
 });
 
-router.delete('/rest/:path/marcadores/:id', function(req,res) {
+router.delete('/rest/espacios/:path/marcadores/:id', function(req,res) {
     var path = req.params.path;
     var id = req.params.id;
     espacios.eliminarMarcador(req.credenciales, path, id)
+    .then( function(result) {
+        res.statusCode = 200;
+        res.send(result);
+        res.end();      
+    })
+    .catch( function(err) {
+        res.statusCode = err.code;
+        res.send(err);
+        res.end();    
+    });         
+});
+
+
+
+//api de usuario
+router.get('/rest/usuarios/', function(req, res) {
+    espacios.usuarios(req.credenciales)
+    .then( function(result) {
+        res.send(result);
+        res.end();      
+    })
+    .catch( function(err) {
+        res.send(err);
+        res.end();    
+    });    
+});
+
+router.get('/rest/usuarios/:nombre', function(req,res) {
+    var nombre = req.params.nombre;
+    espacios.usuario(req.credenciales, nombre)
+    .then( function(result) {
+        res.statusCode = 200;
+        res.send(result);
+        res.end();      
+    })
+    .catch( function(err) {
+        res.statusCode = err.code;
+        res.send(err);
+        res.end();    
+    });          
+});
+
+router.post('/rest/usuarios/', function(req,res) {
+    var usuario = req.body;
+    espacios.agregarUsuario(req.credenciales, usuario)
+    .then( function(result) {
+        res.send(result);
+        res.end();      
+    })
+    .catch( function(err) {
+        res.send(err);
+        res.end();    
+    });    
+});
+/*
+router.put('/rest/usuarios/:nombre', function(req,res) {
+    var usuario = req.body,
+        nombre = req.params.nombre;
+    espacios.modificarUsuario(req.credenciales, nombre, usuario)
+    .then( function(result) {
+        res.statusCode = 200;
+        res.send(result);
+        res.end();      
+    })
+    .catch( function(err) {
+        res.statusCode = err.code;
+        res.send(err);
+        res.end();    
+    });         
+});*/
+
+router.delete('/rest/usuarios/:nombre', function(req,res) {
+    var nombre = req.params.nombre;
+    espacios.eliminarUsuario(req.credenciales, nombre)
     .then( function(result) {
         res.statusCode = 200;
         res.send(result);
