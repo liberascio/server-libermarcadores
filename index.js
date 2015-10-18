@@ -22,11 +22,9 @@ libermarcadores.configBD({
     url: config['mongo-host']+":"+config['mongo-port']
 }, function(err,result) {
 
-    console.log(argv);
-
     if (argv['init']) {
-        if (argv['admin'] && argv['pass']) {
-            libermarcadores.initDB({username:argv['username'], pass:argv['pass']});        
+        if (argv['user'] && argv['pass']) {
+            libermarcadores.initDB({username:argv['user'], pass:argv['pass'].toString()});        
         }
         else
             console.log("No se han especificado datos del admin. Ej: --user=martin --pass=123");
