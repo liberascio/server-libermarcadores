@@ -1,41 +1,22 @@
 var libermarcadores = require('./libermarcadores');
-var config = require('./config.json');
-var express = require('express');
-var bodyParser = require('body-parser');
-var https = require('https');
+var express = require('express');;
 var fs = require('fs');
-var argv = require('minimist')(process.argv.slice(2));
+var https = require('https');
 var app = express();
 
-app.use(express.static('html'));
-app.use(bodyParser.json());
-
-app.set('port', process.env.PORT || config.port);
 
 var options = {
-    key: fs.readFileSync(config.ssl+'.pem'),
-    cert: fs.readFileSync(config.ssl+'.crt')
+    key: fs.readFileSync('./ssl/contacts.pem'),
+    cert: fs.readFileSync('./ssl/contacts.crt')
 };
 
+app.use('/libermarcadores', libermarcadores);
+libermarcadores.initLibermarcadores()
+.then(function(result) {
+  console.log(result);
+})
+.catch(function(err) {
+  console.log(err)
+})
 
-libermarcadores.configBD({
-    url: config['mongo-host']+":"+config['mongo-port']
-}, function(err,result) {
-
-    if (argv['init']) {
-        if (argv['user'] && argv['pass']) {
-            libermarcadores.initDB({username:argv['user'], pass:argv['pass'].toString()});        
-        }
-        else
-            console.log("No se han especificado datos del admin. Ej: --user=martin --pass=123");
-    } 
-
-    app.use('/libermarcadores', libermarcadores);
-
-    https.createServer(options, app).listen(app.get('port'),config.host);
-
-});
-
-
-
-
+https.createServer(options, app).listen(8000);

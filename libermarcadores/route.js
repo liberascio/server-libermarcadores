@@ -2,19 +2,19 @@
 /*  ----------------- UTILS --------------------- */
 
 String.prototype.getPath = function() {
-    var espacios = this.split('/');    
+    var espacios = this.split('/');
     espacios = espacios.filter(function(esp) {
         if (esp=='' || esp=='rest' || esp=='espacios' || esp=='marcadores')
             return false;
         else
             return true;
     });
-    var pathResult = "/";    
+    var pathResult = "/";
     espacios.forEach(function(esp) {
        pathResult +=  esp + "/";
-    });   
+    });
     return pathResult;
-} 
+}
 
 
 /* --------------- ROUTER ------------*/
@@ -22,9 +22,11 @@ String.prototype.getPath = function() {
 var express = require('express');
 var router = express.Router();
 var espacios = require('./datos');
+var config = require('./config.json');
 var fs = require('fs');
 var path = require('path');
 var auth = require('basic-auth');
+var bodyParser = require('body-parser')
 
 router.use(function(req, res, next) {
     var credenciales = auth(req);
@@ -33,23 +35,45 @@ router.use(function(req, res, next) {
         res.statusCode = 401;
         res.setHeader('WWW-Authenticate', 'Basic');
         res.end('Acceso denegado: Usuario no autorizado');
-    } 
+    }
     else {
         req.credenciales = credenciales;
         next();
     }
 });
 
+router.use(bodyParser.json());
+
 
 
 
 /* --------- ROUTING WEB -----------------*/
-router.get('/web/:path?', function(req,res) {
-    var dirFile = path.join(__dirname, 'views', 'espacio.html');
+
+//VISTA DE ADMIN
+router.get('/web/admin', function(req,res) {
+    var dirFile = path.join(__dirname, 'web', 'admin.html');
     fs.stat(dirFile, function(err,stats){
         if (stats.isFile()) {
             var readFile = fs.createReadStream(dirFile);
-            readFile.pipe(res);                    
+            readFile.pipe(res);
+        }
+        else {
+            res.statusCode = 404;
+            res.end({error:"No se encontró la web para los espacios"});
+        }
+    })
+});
+
+router.get('/web/espacios/:path', function(req,res) {
+    var pathEspacio = req.params.path,
+        dirFile = path.join(__dirname, 'web', 'espacio.html');
+
+        console.log(pathEspacio);
+
+    fs.stat(dirFile, function(err, stats){
+        if (stats.isFile()) {
+            var readFile = fs.createReadStream(dirFile);
+            readFile.pipe(res);
         }
         else {
             res.statusCode = 404;
@@ -65,13 +89,13 @@ router.get('/js/:script', function(req,res) {
     fs.stat(dirFile, function(err,stats){
         if (stats.isFile()) {
             var readFile = fs.createReadStream(dirFile);
-            readFile.pipe(res);                    
+            readFile.pipe(res);
         }
         else {
             res.statusCode = 404;
             res.end({error:"No se encontró el script"});
         }
-    })    
+    })
 });
 
 
@@ -86,9 +110,9 @@ router.get('/rest/espacios/:path/', function(req,res) {
     .then( function(result) {
         res.statusCode = 200;
         res.send(result);
-        res.end();    
+        res.end();
     })
-    .catch( function(err) {     
+    .catch( function(err) {
         res.statusCode = err.code;
         res.send(err);
         res.end();
@@ -98,7 +122,7 @@ router.get('/rest/espacios/:path/', function(req,res) {
 /*
 router.get('/rest/:path/:nombre', function(req,res) {
     var pathPadre = req.params.path;
-    var nombre = req.params.nombre;    
+    var nombre = req.params.nombre;
     espacios.obtenerEspacio(req.credenciales, pathPadre, nombre, function(err,result) {
         if (err) {
             res.statusCode = err.code;
@@ -108,7 +132,7 @@ router.get('/rest/:path/:nombre', function(req,res) {
         else {
             res.statusCode = 200;
             res.send(result);
-            res.end();                
+            res.end();
         }
     });
 });*/
@@ -120,12 +144,12 @@ router.post('/rest/espacios/:path/', function(req,res) {
     .then(function(result) {
         res.statusCode = 200;
         res.send(result);
-        res.end(); 
-    })    
+        res.end();
+    })
     .catch(function(err) {
         res.statusCode = err.code;
         res.send(err);
-        res.end();    
+        res.end();
     });
 });
 
@@ -141,7 +165,7 @@ router.put('/rest/espacios/:path/', function(req,res) {
         else {
             res.statusCode = 200;
             res.send(result);
-            res.end();                
+            res.end();
         }
     })
 });
@@ -152,12 +176,12 @@ router.delete('/rest/espacios/:path/', function(req,res) {
     .then( function(result) {
         res.statusCode = 200;
         res.send(result);
-        res.end();      
+        res.end();
     })
     .catch( function(err) {
         res.statusCode = err.code;
         res.send(err);
-        res.end();    
+        res.end();
     });
 });
 
@@ -167,12 +191,12 @@ router.get('/rest/espacios/:path/marcadores/', function(req, res) {
     espacios.marcadores(req.credenciales, path)
     .then( function(result) {
         res.send(result);
-        res.end();      
+        res.end();
     })
     .catch( function(err) {
         res.send(err);
-        res.end();    
-    });    
+        res.end();
+    });
 });
 
 router.get('/rest/espacios/:path/marcadores/:id', function(req,res) {
@@ -182,13 +206,13 @@ router.get('/rest/espacios/:path/marcadores/:id', function(req,res) {
     .then( function(result) {
         res.statusCode = 200;
         res.send(result);
-        res.end();      
+        res.end();
     })
     .catch( function(err) {
         res.statusCode = err.code;
         res.send(err);
-        res.end();    
-    });          
+        res.end();
+    });
 });
 
 router.post('/rest/espacios/:path/marcadores/', function(req,res) {
@@ -197,12 +221,12 @@ router.post('/rest/espacios/:path/marcadores/', function(req,res) {
     espacios.agregarMarcador(req.credenciales, path, marcador)
     .then( function(result) {
         res.send(result);
-        res.end();      
+        res.end();
     })
     .catch( function(err) {
         res.send(err);
-        res.end();    
-    });    
+        res.end();
+    });
 });
 
 router.put('/rest/espacios/:path/marcadores/:id', function(req,res) {
@@ -213,13 +237,13 @@ router.put('/rest/espacios/:path/marcadores/:id', function(req,res) {
     .then( function(result) {
         res.statusCode = 200;
         res.send(result);
-        res.end();      
+        res.end();
     })
     .catch( function(err) {
         res.statusCode = err.code;
         res.send(err);
-        res.end();    
-    });         
+        res.end();
+    });
 });
 
 router.delete('/rest/espacios/:path/marcadores/:id', function(req,res) {
@@ -229,13 +253,13 @@ router.delete('/rest/espacios/:path/marcadores/:id', function(req,res) {
     .then( function(result) {
         res.statusCode = 200;
         res.send(result);
-        res.end();      
+        res.end();
     })
     .catch( function(err) {
         res.statusCode = err.code;
         res.send(err);
-        res.end();    
-    });         
+        res.end();
+    });
 });
 
 
@@ -245,12 +269,12 @@ router.get('/rest/usuarios/', function(req, res) {
     espacios.usuarios(req.credenciales)
     .then( function(result) {
         res.send(result);
-        res.end();      
+        res.end();
     })
     .catch( function(err) {
         res.send(err);
-        res.end();    
-    });    
+        res.end();
+    });
 });
 
 router.get('/rest/usuarios/:nombre', function(req,res) {
@@ -259,13 +283,13 @@ router.get('/rest/usuarios/:nombre', function(req,res) {
     .then( function(result) {
         res.statusCode = 200;
         res.send(result);
-        res.end();      
+        res.end();
     })
     .catch( function(err) {
         res.statusCode = err.code;
         res.send(err);
-        res.end();    
-    });          
+        res.end();
+    });
 });
 
 router.post('/rest/usuarios/', function(req,res) {
@@ -273,12 +297,12 @@ router.post('/rest/usuarios/', function(req,res) {
     espacios.agregarUsuario(req.credenciales, usuario)
     .then( function(result) {
         res.send(result);
-        res.end();      
+        res.end();
     })
     .catch( function(err) {
         res.send(err);
-        res.end();    
-    });    
+        res.end();
+    });
 });
 /*
 router.put('/rest/usuarios/:nombre', function(req,res) {
@@ -288,13 +312,13 @@ router.put('/rest/usuarios/:nombre', function(req,res) {
     .then( function(result) {
         res.statusCode = 200;
         res.send(result);
-        res.end();      
+        res.end();
     })
     .catch( function(err) {
         res.statusCode = err.code;
         res.send(err);
-        res.end();    
-    });         
+        res.end();
+    });
 });*/
 
 router.delete('/rest/usuarios/:nombre', function(req,res) {
@@ -303,21 +327,18 @@ router.delete('/rest/usuarios/:nombre', function(req,res) {
     .then( function(result) {
         res.statusCode = 200;
         res.send(result);
-        res.end();      
+        res.end();
     })
     .catch( function(err) {
         res.statusCode = err.code;
         res.send(err);
-        res.end();    
-    });         
+        res.end();
+    });
 });
 
 
 //EXPORTO EL ROUTER
 module.exports = router;
-module.exports.configBD = function(options,callback) {
-   return espacios.configBD(options,callback); 
-}
-module.exports.initDB = function(admin) {
-   return espacios.initDB(admin); 
+module.exports.initLibermarcadores = function() {
+   return espacios.configBD(config);
 }
