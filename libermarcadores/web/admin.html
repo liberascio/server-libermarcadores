@@ -19,7 +19,6 @@
                 Path: <input type="text" id="path-espacio">
                 Nombre: <input type="text" id="nombre-espacio">
                <ul id='menu-espacios'>
-                 <li><button id="obtener-espacios">Obtener Espacios</button></li>
                  <li><button id="obtener-espacio">Obtener Espacio</button></li>
                  <li><button id="agregar-espacio">Agregar Espacio</button></li>
                  <li><button id="borrar-espacio">Borrar Espacio</button></li>
@@ -99,33 +98,15 @@
             document.getElementById('results').style.display = 'block';
 
             switch(evento.target.id) {
-                case "obtener-espacios": new Request({
+
+                case "obtener-espacio": new Request({
                     metodo: 'GET',
                     url: urlEspacio,
                     header: {"Content-type": "application/json;charset=UTF-8",
                             "Authorization": "Basic " + btoa("martin:123")
                     },
                     fin: function(resp) {
-                        var respuesta = JSON.parse(resp);
-                        respuesta.result.forEach(function(espacio) {
-                          var li = document.createElement('li')
-                              a = document.createElement('a');
-                          a.innerHTML = espacio.path;
-                          a.href = '#';
-                          li.appendChild(a);
-                          resultList.appendChild(li);
-                        });
-
-                    }
-                });break;
-
-                case "obtener-espacio": new Request({
-                    metodo: 'GET',
-                    url: urlEspacio + "/" + nombre,
-                    header: {"Content-type": "application/json;charset=UTF-8",
-                            "Authorization": "Basic " + btoa("martin:123")
-                    },
-                    fin: function(resp) {
+                      console.log(resp);
                       var respuesta = JSON.parse(resp);
                       var li = document.createElement('li')
                           a = document.createElement('a');

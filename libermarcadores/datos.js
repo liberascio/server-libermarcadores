@@ -11,7 +11,6 @@ var datos = require('./datos');
 var initFlag = argv['init-liber'];
 var user = argv['u'] || argv['user'];
 var pass = argv['p'] || argv['pass'];
-pass = pass.toString();
 
 
 //FUNCION EXPORTADA PARA LA CONFIGURACION DE LA BASE DE DATOS
@@ -22,7 +21,7 @@ module.exports.configBD = function(options) {
          if (!err) {
              database = db;
              if (initFlag && user && pass) {
-                 initDB({username:user, pass:pass}).
+                 initDB({username:user, pass:pass.toString()}).
                  then(function(result) {
                    console.log("Configuración inicial realizada exitosamente!")
                    console.log("Saliendo...");
@@ -133,6 +132,7 @@ var existeUsuario  = function(colUsuarios, credenciales) {
 //VERIFICO SI EXISTE EL ESPACIO
 var existeEspacio = function(colEspacios, pathEspacio) {
     var pathEsp = (pathEspacio.search('.')==0 && pathEspacio!="root") ? 'root.' + pathEspacio : pathEspacio;
+    console.log(pathEsp);
     return new Promise( function(resolve, reject) {
         database.collection(colEspacios)
             .find({path:pathEsp})
@@ -171,6 +171,7 @@ function verificarPermiso(usuario, espacio, tipo) {
 
 /* ------------------------------ API DE ESPACIOS ------------------------------- */
 
+/* DEPRECATED
 //Obtener todos los subespacios de un espacio
 module.exports.espacios = function(credencial, pathEspacio, nivel) {
     var usuario, espacio, expresion, regExpNivel = (nivel>0) ? "{"+nivel+"}$" : "+";
@@ -196,19 +197,45 @@ module.exports.espacios = function(credencial, pathEspacio, nivel) {
             reject(err);
         });
     });
-}
-
-
-/*
-//Obtener un subespacio del espacio
-module.exports.obtenerEspacio = function(credencial, pathPadre, nombre, callback) {
-    autenticarUsuario(credencial, function() {
-        var pathEspacio = pathPadre + "." + nombre;
-        verificarEspacio(pathEspacio, credencial.name, 'usuario', function(err,espacio) {
-            callback(null,espacio);
-        });
-    });
 }*/
+
+
+
+//Obtener un espacio según path
+module.exports.obtenerEspacio = function(credencial, path) {
+  return new Promise(function(resolve, reject) {
+      existeUsuario(colUsuarios, credencial)
+      .then( function(usuarioResult) {
+          return existeEspacio(colEspacios, path)
+       })
+      .then( function(espacioResult) {
+            var buscar = espacioResult.permisos.filter(function(perm) {
+              return (perm.usuario == credencial.name);
+            });
+            if (buscar.length == 1) {
+              //BUSCO LOS SUBESPACIOS PARA AGREGAR AL RESULTADO
+              espacioResult.subespacios = [];
+              var regexp = new RegExp(path + "(.(\\w|\\d)+){1}$");
+              database.collection(colEspacios)
+                  .find({path:regexp, permisos:{$elemMatch: {usuario:credencial.name} }})
+                      .toArray(function(err, result){
+                          if (!err) {
+                            result.forEach(function(sub) {
+                              espacioResult.subespacios.push(sub.nombre);
+                            });
+                          }
+                          resolve({code:200, result:espacioResult, msg:'OK'});
+              });
+            }
+            else {
+              reject({code:403, msg:'Acceso prohibido: no existe el usuario', error:err});
+            }
+      })
+      .catch(function(err) {
+          reject(err);
+      });
+  });
+}
 
 
 //Agregar un nuevo subespacio

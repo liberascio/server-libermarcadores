@@ -87,6 +87,7 @@ router.get('/web/js/:script', function(req,res) {
 
 
 /* -------------- ROUTING REST ------------ */
+/*
 //api de espacios
 router.get('/rest/espacios/:path/', function(req,res) {
     var pathEspacio = req.params.path, nivel = (req.query.nivel) ? parseInt(req.query.nivel) : 0;
@@ -101,25 +102,23 @@ router.get('/rest/espacios/:path/', function(req,res) {
         res.send(err);
         res.end();
     });
-});
-
-/*
-router.get('/rest/:path/:nombre', function(req,res) {
-    var pathPadre = req.params.path;
-    var nombre = req.params.nombre;
-    espacios.obtenerEspacio(req.credenciales, pathPadre, nombre, function(err,result) {
-        if (err) {
-            res.statusCode = err.code;
-            res.send({error:err.mensaje, detalle:err.detalle});
-            res.end();
-        }
-        else {
-            res.statusCode = 200;
-            res.send(result);
-            res.end();
-        }
-    });
 });*/
+
+
+router.get('/rest/espacios/:path/', function(req,res) {
+    var path = req.params.path;
+    espacios.obtenerEspacio(req.credenciales, path)
+      .then(function(result) {
+        res.statusCode = 200;
+        res.send(result);
+        res.end();
+    })
+    .catch(function(err) {
+        res.statusCode = err.code;
+        res.send(err);
+        res.end();
+    });
+});
 
 router.post('/rest/espacios/:path/', function(req,res) {
     var pathPadre = req.params.path;
