@@ -10,44 +10,52 @@
   <body>
     <div id="principal">
         <ul id="menu">
-            <li><a href="#" id='menu-espacios'>Espacios</a></li>
-            <li><a href="#" id='menu-usuarios'>Usuarios</a></li>            
+            <li><a href="#" id='vermenu-espacios'>Espacios</a></li>
+            <li><a href="#" id='vermenu-usuarios'>Usuarios</a></li>
         </ul>
-       
+
        <div id="views">
            <div id="view-espacios" class='view' style="display:none">
                 Path: <input type="text" id="path-espacio">
                 Nombre: <input type="text" id="nombre-espacio">
-               <ul>
+               <ul id='menu-espacios'>
                  <li><button id="obtener-espacios">Obtener Espacios</button></li>
                  <li><button id="obtener-espacio">Obtener Espacio</button></li>
                  <li><button id="agregar-espacio">Agregar Espacio</button></li>
                  <li><button id="borrar-espacio">Borrar Espacio</button></li>
-               </ul>      
+               </ul>
            </div>
-           
+
            <div id="view-usuarios" class='view' style="display:none">
                 Nombre: <input type="text" id="nombre-usuario">
                 Pass: <input type="text" id="pass-usuario">
-               <ul>
+               <ul id='menu-usuarios'>
                  <li><button id="obtener-usuarios">Obtener Usuarios</button></li>
                  <li><button id="obtener-usuario">Obtener Usuario</button></li>
                  <li><button id="agregar-usuario">Agregar Usuario</button></li>
                  <li><button id="borrar-usuario">Borrar Usuario</button></li>
-               </ul>      
-           </div>       
+               </ul>
+           </div>
+       </div>
+
+       <br>
+       <div id="results" style="display:none">
+         <h3>Resultados:</h3>
+         <ul id="result-list"></ul>
+         <div id="result"></div>
+         <span id="result-msg"></span>
        </div>
     </div>
 
     <script>
         var Request = function(opciones) {
-            request = this.request = new XMLHttpRequest(); 
+            request = this.request = new XMLHttpRequest();
             var async = (opciones.async!=undefined) ? opciones.async : true;
             request.open(opciones.metodo,opciones.url,async);
             var header = (opciones.header!=undefined) ? opciones.header : "";
             Object.keys(header).forEach(function(head) {
                 request.setRequestHeader(head,header[head]);
-            });    
+            });
             var datos = (opciones.datos!=undefined) ? opciones.datos : "";
             request.send(datos);
             request.onreadystatechange = function() {
@@ -55,33 +63,41 @@
                     opciones.fin(this.responseText);
                 }
             }
-        } 
-        
+        }
+
         document.getElementById('menu').addEventListener('click', function(event) {
-            if (event.target.id=='menu-espacios') {
+          resultList = document.getElementById('result-list'),
+          result = document.getElementById('result'),
+          resultMsg = document.getElementById('result-msg');
+          document.getElementById('results').style.display = 'none'
+          resultMsg.innerHTML = resultList.innerHTML = result.innerHTML = '';
+
+            if (event.target.id=='vermenu-espacios') {
                 document.getElementById('view-espacios').style.display = 'block';
-                document.getElementById('view-usuarios').style.display = 'none';                
+                document.getElementById('view-usuarios').style.display = 'none';
             }
-            else if (event.target.id=='menu-usuarios') {
+            else if (event.target.id=='vermenu-usuarios') {
                 document.getElementById('view-espacios').style.display = 'none';
-                document.getElementById('view-usuarios').style.display = 'block';                            
+                document.getElementById('view-usuarios').style.display = 'block';
             }
         });
-        
+
         NodeList.prototype.forEach = Array.prototype.forEach;
-        var views = document.getElementById('views');
-        
-        
-        
-        views.addEventListener('click',function(evento) {
+
+        document.getElementById('menu-espacios').addEventListener('click',function(evento) {
             var path = (document.getElementById('path-espacio').value) ? document.getElementById('path-espacio').value : 'root',
                 urlEspacio = "https://localhost:8000/libermarcadores/rest/espacios/" + path,
                 urlUsuario = "https://localhost:8000/libermarcadores/rest/usuarios",
                 nombre = document.getElementById('nombre-espacio').value,
                 nombreUsuario = document.getElementById('nombre-usuario').value,
-                passUsuario = document.getElementById('pass-usuario').value;
-           
-            console.log(urlEspacio);
+                passUsuario = document.getElementById('pass-usuario').value,
+                resultList = document.getElementById('result-list'),
+                result = document.getElementById('result'),
+                resultMsg = document.getElementById('result-msg');
+
+            resultMsg.innerHTML = resultList.innerHTML = result.innerHTML = '';
+            document.getElementById('results').style.display = 'block';
+
             switch(evento.target.id) {
                 case "obtener-espacios": new Request({
                     metodo: 'GET',
@@ -91,10 +107,18 @@
                     },
                     fin: function(resp) {
                         var respuesta = JSON.parse(resp);
-                        console.log(respuesta);
+                        respuesta.result.forEach(function(espacio) {
+                          var li = document.createElement('li')
+                              a = document.createElement('a');
+                          a.innerHTML = espacio.path;
+                          a.href = '#';
+                          li.appendChild(a);
+                          resultList.appendChild(li);
+                        });
+
                     }
                 });break;
-                
+
                 case "obtener-espacio": new Request({
                     metodo: 'GET',
                     url: urlEspacio + "/" + nombre,
@@ -102,11 +126,16 @@
                             "Authorization": "Basic " + btoa("martin:123")
                     },
                     fin: function(resp) {
-                        var respuesta = JSON.parse(resp);
-                        console.log(respuesta);
+                      var respuesta = JSON.parse(resp);
+                      var li = document.createElement('li')
+                          a = document.createElement('a');
+                      a.innerHTML = respuesta.result.path;
+                      a.href = '#';
+                      li.appendChild(a);
+                      resultList.appendChild(li);
                     }
-                });break;   
-                
+                });break;
+
                 case "agregar-espacio": new Request({
                     metodo: 'POST',
                     url: urlEspacio,
@@ -116,10 +145,10 @@
                     },
                     fin: function(resp) {
                         var respuesta = JSON.parse(resp);
-                        console.log(respuesta);
+                        resultMsg.innerHTML = respuesta.msg;
                     }
-                });break;       
-                
+                });break;
+
                 /*
                 case "modificar-espacio": new Request({
                     metodo: 'PUT',
@@ -132,7 +161,7 @@
                         var respuesta = JSON.parse(resp);
                         console.log(respuesta);
                     }
-                });break;   */              
+                });break;   */
 
                 case "borrar-espacio": new Request({
                     metodo: 'DELETE',
@@ -140,16 +169,30 @@
                     header: {"Content-type": "application/json;charset=UTF-8"},
                     fin: function(resp) {
                         var respuesta = JSON.parse(resp);
-                        console.log(respuesta);
+                        resultMsg.innerHTML = respuesta.msg;
                     }
-                });break;         
-                
-                
-                
-                
-                
-                
-                
+                });break;
+              }
+            });
+
+
+
+
+            document.getElementById('menu-usuarios').addEventListener('click',function(evento) {
+                var path = (document.getElementById('path-espacio').value) ? document.getElementById('path-espacio').value : 'root',
+                    urlEspacio = "https://localhost:8000/libermarcadores/rest/espacios/" + path,
+                    urlUsuario = "https://localhost:8000/libermarcadores/rest/usuarios",
+                    nombre = document.getElementById('nombre-espacio').value,
+                    nombreUsuario = document.getElementById('nombre-usuario').value,
+                    passUsuario = document.getElementById('pass-usuario').value,
+                    resultList = document.getElementById('result-list'),
+                    result = document.getElementById('result'),
+                    resultMsg = document.getElementById('result-msg');
+
+                resultMsg.innerHTML = resultList.innerHTML = result.innerHTML = '';
+                document.getElementById('results').style.display = 'block';
+
+                switch(evento.target.id) {
                 case "obtener-usuarios": new Request({
                     metodo: 'GET',
                     url: urlUsuario,
@@ -158,7 +201,14 @@
                     },
                     fin: function(resp) {
                         var respuesta = JSON.parse(resp);
-                        console.log(respuesta);
+                        respuesta.result.forEach(function(usuario) {
+                          var li = document.createElement('li')
+                              a = document.createElement('a');
+                          a.innerHTML = usuario.username;
+                          a.href = '#';
+                          li.appendChild(a);
+                          resultList.appendChild(li);
+                        });
                     }
                 });break;
 
@@ -169,11 +219,16 @@
                             "Authorization": "Basic " + btoa("martin:123")
                     },
                     fin: function(resp) {
-                        var respuesta = JSON.parse(resp);
-                        console.log(respuesta);
+                      var respuesta = JSON.parse(resp);
+                      var li = document.createElement('li')
+                          a = document.createElement('a');
+                      a.innerHTML = respuesta.result.username;
+                      a.href = '#';
+                      li.appendChild(a);
+                      resultList.appendChild(li);
                     }
-                });break;   
-                             
+                });break;
+
                 case "agregar-usuario": new Request({
                     metodo: 'POST',
                     url: urlUsuario,
@@ -183,9 +238,9 @@
                     },
                     fin: function(resp) {
                         var respuesta = JSON.parse(resp);
-                        console.log(respuesta);
+                        resultMsg.innerHTML = respuesta.msg;
                     }
-                });break;       
+                });break;
 /*
                 case "modificar-usuario": new Request({
                     metodo: 'PUT',
@@ -198,7 +253,7 @@
                         var respuesta = JSON.parse(resp);
                         console.log(respuesta);
                     }
-                });break;   */              
+                });break;   */
 
                 case "borrar-usuario": new Request({
                     metodo: 'DELETE',
@@ -206,13 +261,12 @@
                     header: {"Content-type": "application/json;charset=UTF-8"},
                     fin: function(resp) {
                         var respuesta = JSON.parse(resp);
-                        console.log(respuesta);
+                        resultMsg.innerHTML = respuesta.msg;
                     }
-                });break;                                      
-                              
+                });break;
+
             }
         });
-    </script>       
+    </script>
   </body>
 </html>
-

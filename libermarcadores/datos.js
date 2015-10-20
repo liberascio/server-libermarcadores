@@ -11,6 +11,7 @@ var datos = require('./datos');
 var initFlag = argv['init-liber'];
 var user = argv['u'] || argv['user'];
 var pass = argv['p'] || argv['pass'];
+pass = pass.toString();
 
 
 //FUNCION EXPORTADA PARA LA CONFIGURACION DE LA BASE DE DATOS
