@@ -159,94 +159,94 @@
 
 
 
-            document.getElementById('menu-usuarios').addEventListener('click',function(evento) {
-                var path = (document.getElementById('path-espacio').value) ? document.getElementById('path-espacio').value : 'root',
-                    urlEspacio = "https://localhost:8000/libermarcadores/rest/espacios/" + path,
-                    urlUsuario = "https://localhost:8000/libermarcadores/rest/usuarios",
-                    nombre = document.getElementById('nombre-espacio').value,
-                    nombreUsuario = document.getElementById('nombre-usuario').value,
-                    passUsuario = document.getElementById('pass-usuario').value,
-                    resultList = document.getElementById('result-list'),
-                    result = document.getElementById('result'),
-                    resultMsg = document.getElementById('result-msg');
+          document.getElementById('menu-usuarios').addEventListener('click',function(evento) {
+              var path = (document.getElementById('path-espacio').value) ? document.getElementById('path-espacio').value : 'root',
+                  urlEspacio = "https://localhost:8000/libermarcadores/rest/espacios/" + path,
+                  urlUsuario = "https://localhost:8000/libermarcadores/rest/usuarios",
+                  nombre = document.getElementById('nombre-espacio').value,
+                  nombreUsuario = document.getElementById('nombre-usuario').value,
+                  passUsuario = document.getElementById('pass-usuario').value,
+                  resultList = document.getElementById('result-list'),
+                  result = document.getElementById('result'),
+                  resultMsg = document.getElementById('result-msg');
 
-                resultMsg.innerHTML = resultList.innerHTML = result.innerHTML = '';
-                document.getElementById('results').style.display = 'block';
+              resultMsg.innerHTML = resultList.innerHTML = result.innerHTML = '';
+              document.getElementById('results').style.display = 'block';
 
-                switch(evento.target.id) {
-                case "obtener-usuarios": new Request({
-                    metodo: 'GET',
-                    url: urlUsuario,
-                    header: {"Content-type": "application/json;charset=UTF-8",
-                            "Authorization": "Basic " + btoa("martin:123")
-                    },
-                    fin: function(resp) {
-                        var respuesta = JSON.parse(resp);
-                        respuesta.result.forEach(function(usuario) {
-                          var li = document.createElement('li')
-                              a = document.createElement('a');
-                          a.innerHTML = usuario.username;
-                          a.href = '#';
-                          li.appendChild(a);
-                          resultList.appendChild(li);
-                        });
-                    }
-                });break;
-
-                case "obtener-usuario": new Request({
-                    metodo: 'GET',
-                    url: urlUsuario + "/" + nombreUsuario,
-                    header: {"Content-type": "application/json;charset=UTF-8",
-                            "Authorization": "Basic " + btoa("martin:123")
-                    },
-                    fin: function(resp) {
+              switch(evento.target.id) {
+              case "obtener-usuarios": new Request({
+                  metodo: 'GET',
+                  url: urlUsuario,
+                  header: {"Content-type": "application/json;charset=UTF-8",
+                          "Authorization": "Basic " + btoa("martin:123")
+                  },
+                  fin: function(resp) {
                       var respuesta = JSON.parse(resp);
-                      var li = document.createElement('li')
-                          a = document.createElement('a');
-                      a.innerHTML = respuesta.result.username;
-                      a.href = '#';
-                      li.appendChild(a);
-                      resultList.appendChild(li);
-                    }
-                });break;
+                      respuesta.result.forEach(function(usuario) {
+                        var li = document.createElement('li')
+                            a = document.createElement('a');
+                        a.innerHTML = usuario.username;
+                        a.href = '#';
+                        li.appendChild(a);
+                        resultList.appendChild(li);
+                      });
+                  }
+              });break;
 
-                case "agregar-usuario": new Request({
-                    metodo: 'POST',
-                    url: urlUsuario,
-                    datos: JSON.stringify({username:nombreUsuario, pass:passUsuario}),
-                    header: {"Content-type": "application/json;charset=UTF-8",
-                            "Authorization": "Basic " + btoa("martin:123")
-                    },
-                    fin: function(resp) {
-                        var respuesta = JSON.parse(resp);
-                        resultMsg.innerHTML = respuesta.msg;
-                    }
-                });break;
+              case "obtener-usuario": new Request({
+                  metodo: 'GET',
+                  url: urlUsuario + "/" + nombreUsuario,
+                  header: {"Content-type": "application/json;charset=UTF-8",
+                          "Authorization": "Basic " + btoa("martin:123")
+                  },
+                  fin: function(resp) {
+                    var respuesta = JSON.parse(resp);
+                    var li = document.createElement('li')
+                        a = document.createElement('a');
+                    a.innerHTML = respuesta.result.username;
+                    a.href = '#';
+                    li.appendChild(a);
+                    resultList.appendChild(li);
+                  }
+              });break;
+
+              case "agregar-usuario": new Request({
+                  metodo: 'POST',
+                  url: urlUsuario,
+                  datos: JSON.stringify({username:nombreUsuario, pass:passUsuario}),
+                  header: {"Content-type": "application/json;charset=UTF-8",
+                          "Authorization": "Basic " + btoa("martin:123")
+                  },
+                  fin: function(resp) {
+                      var respuesta = JSON.parse(resp);
+                      resultMsg.innerHTML = respuesta.msg;
+                  }
+              });break;
 /*
-                case "modificar-usuario": new Request({
-                    metodo: 'PUT',
-                    url: url + "/" + nombreUsuario,
-                    datos: JSON.stringify({path:path, subespacios:["superprueba"]}),
-                    header: {"Content-type": "application/json;charset=UTF-8",
-                            "Authorization": "Basic " + btoa("martin:123")
-                    },
-                    fin: function(resp) {
-                        var respuesta = JSON.parse(resp);
-                        console.log(respuesta);
-                    }
-                });break;   */
+              case "modificar-usuario": new Request({
+                  metodo: 'PUT',
+                  url: url + "/" + nombreUsuario,
+                  datos: JSON.stringify({path:path, subespacios:["superprueba"]}),
+                  header: {"Content-type": "application/json;charset=UTF-8",
+                          "Authorization": "Basic " + btoa("martin:123")
+                  },
+                  fin: function(resp) {
+                      var respuesta = JSON.parse(resp);
+                      console.log(respuesta);
+                  }
+              });break;   */
 
-                case "borrar-usuario": new Request({
-                    metodo: 'DELETE',
-                    url: urlUsuario + "/" + nombreUsuario,
-                    header: {"Content-type": "application/json;charset=UTF-8"},
-                    fin: function(resp) {
-                        var respuesta = JSON.parse(resp);
-                        resultMsg.innerHTML = respuesta.msg;
-                    }
-                });break;
+              case "borrar-usuario": new Request({
+                  metodo: 'DELETE',
+                  url: urlUsuario + "/" + nombreUsuario,
+                  header: {"Content-type": "application/json;charset=UTF-8"},
+                  fin: function(resp) {
+                      var respuesta = JSON.parse(resp);
+                      resultMsg.innerHTML = respuesta.msg;
+                  }
+              });break;
 
-            }
+          }
         });
     </script>
   </body>

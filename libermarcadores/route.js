@@ -67,9 +67,9 @@ router.get('/web/espacios/:path', function(req,res) {
 });
 
 
-router.get('/web/js/:script', function(req,res) {
+router.get('/js/:script', function(req,res) {
     var script = req.params.script;
-    var dirFile = path.join(__dirname, 'views', 'js', script);
+    var dirFile = path.join(__dirname, 'web', 'js', script);
     fs.stat(dirFile, function(err,stats){
         if (stats.isFile()) {
             var readFile = fs.createReadStream(dirFile);

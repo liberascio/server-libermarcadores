@@ -1,31 +1,50 @@
-var divLista = document.getElementById('lista-marcadores');
-var espacio = window.location.href;
-espacio = espacio.substring(espacio.indexOf('web')+3,espacio.length)+"/";
-var url = "https://localhost:8000/libermarcadores/rest" + espacio;
+var divLista = document.getElementById('lista-marcadores'),
+  urlEspacio = window.location.href.substring(window.location.href.indexOf('web')
+    + 3, window.location.href.length)+"/",
+  urlBasica = "https://localhost:8000/libermarcadores/rest",
+  url = urlBasica + urlEspacio,
+  espacio;
+
 
 new Request({
     metodo: 'GET',
-    url: url + "marcadores",
+    url: url,
     header: {"Content-type": "application/json;charset=UTF-8"},
     fin: function(resp) {
-        var marcadores = JSON.parse(resp);
-        var ul = divLista.querySelector('ul');
-        marcadores.forEach(function (marcador){
-            var li = document.createElement('li');
-            var texto = document.createTextNode(marcador.titulo);
-            var a = document.createElement('a');
-            a.href = marcador.url;
-            a.appendChild(texto);
-            li.appendChild(a);
-            ul.appendChild(li);
-        });
+        var ul = divLista.querySelector('ul'),
+            marcadores,
+            response = JSON.parse(resp);
+
+        espacio = response.result;
+        if(espacio.marcadores) {
+          espacio.marcadores.forEach(function(marcador) {
+              var li = document.createElement('li');
+              var texto = document.createTextNode(marcador.titulo);
+              var a = document.createElement('a');
+              a.href = marcador.url;
+              a.appendChild(texto);
+              li.appendChild(a);
+              ul.appendChild(li);
+          });
+        }
+        ul = document.getElementById('lista-subespacios').getElementsByTagName('ul')[0];
+        if(espacio.subespacios) {
+          espacio.subespacios.forEach(function(esp) {
+              var li = document.createElement('li');
+              var a = document.createElement('a');
+              a.href = urlBasica + "/espacios/" + espacio.path.getPath() + "." + esp;
+              a.innerHTML = esp;
+              li.appendChild(a);
+              ul.appendChild(li);
+          });
+        }
     }
 });
 
 divLista.querySelector('ul').addEventListener('click', function(event) {
    event.preventDefault();
    var url = event.target.href;
-   if (url) 
+   if (url)
        window.open(url);
 });
 
@@ -36,8 +55,8 @@ document.getElementById('menu-espacio').addEventListener('click',function(event)
         var views = this.parentNode.querySelectorAll('.view');
         views.forEach(function(view){
             view.style.display = (view.getAttribute('opcion-view')==opcion) ? 'block' : 'none';
-        });      
-    }  
+        });
+    }
 });
 
 document.getElementById('crear-boton').addEventListener('click', function(event) {
@@ -50,21 +69,11 @@ document.getElementById('crear-boton').addEventListener('click', function(event)
         header: {"Content-type": "application/json;charset=UTF-8"},
         fin: function(resp) {
             console.log(resp);
-         }   
+         }
         });
     }
 });
 
-document.getElementById('ver-boton').addEventListener('click', function(event) {
-    new Request({
-    metodo: 'GET',
-    url: url + "?nivel=1",
-    header: {"Content-type": "application/json;charset=UTF-8"},
-    fin: function(resp) {
-        console.log(resp);
-     }   
-    });
-});
 
 document.getElementById('mod-boton').addEventListener('click', function(event) {
     var nombre = document.getElementById('mod-nombre').value;
@@ -78,7 +87,7 @@ document.getElementById('mod-boton').addEventListener('click', function(event) {
     header: {"Content-type": "application/json;charset=UTF-8"},
     fin: function(resp) {
         console.log(resp);
-     }   
+     }
     });
 });
 
@@ -90,7 +99,7 @@ document.getElementById('bot-borrar').addEventListener('click', function(event) 
         header: {"Content-type": "application/json;charset=UTF-8"},
         fin: function(resp) {
             console.log(resp);
-         }   
-        });    
+         }
+        });
     }
 });

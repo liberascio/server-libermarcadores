@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Web LiberEspacio</title>
   </head>
-  
+
   <body>
     <div id="vista-principal">
         <h2>Bienvenido!</h2>
@@ -14,38 +14,35 @@
         <div id="lista-marcadores">
             <ul></ul>
         </div>
+        <h3>Subespacios</h3>
+        <div id="lista-subespacios">
+            <ul>
+            </ul>
+        </div>
         <h3>Administrar Espacio de Trabajo</h3>
         <div id="admin-espacio">
             <ul id="menu-espacio">
                 <li><a opcion="crear" href="#">Crear espacio nuevo</a></li>
-                <li><a opcion="ver" href="#">Ver espacios</a></li>
-                <li><a opcion="modificar" href="#">Modificar</a></li>
+                <li><a opcion="agregar-permisos" href="#">Agregar Permisos</a></li>
                 <li><a id="bot-borrar" href="#">Borrar</a></li>
             </ul>
-            <div class="view" opcion-view="crear" style="display:none">  
+            <div class="view" opcion-view="crear" style="display:none">
                 Nombre:
                 <input type="text" id="crear-nombre"/>
-                <button id="crear-boton">Enviar</button>                 
-            </div>            
-            <div class="view" opcion-view="ver" style="display:none"> 
-                <button id="ver-boton">Desplegar</button>                
-                <ul>
-                </ul>
-            </div>            
-            <div class="view" opcion-view="modificar" style="display:none">                
+                <button id="crear-boton">Enviar</button>
+            </div>
+            <div class="view" opcion-view="modificar" style="display:none">
                 Nombre:
-                <input type="text" id="mod-nombre"/>            
+                <input type="text" id="mod-nombre"/>
                 Permisos:
-                <input type="text" id="mod-permisos"/>               
+                <input type="text" id="mod-permisos"/>
                 <button id="mod-boton">Enviar</button>
-            </div>                                                
+            </div>
         </div>
     </div>
-    
+
     <script type="text/javascript" src="https://localhost:8000/libermarcadores/js/utils.js"></script>
     <script type="text/javascript" src="https://localhost:8000/libermarcadores/js/espacio.js"></script>
   </body>
-  
+
 </html>
-  
-  
