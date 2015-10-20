@@ -21,18 +21,33 @@ module.exports.configBD = function(options) {
          if (!err) {
              database = db;
              if (initFlag && user && pass) {
-                 datos.initDB({username:user, pass:pass}).
+                 initDB({username:user, pass:pass}).
                  then(function(result) {
                    console.log("Configuración inicial realizada exitosamente!")
                    console.log("Saliendo...");
+                   resolve('Libermarcadores iniciado correctamente');
                  })
                  .catch(function(err) {
                    console.log("Error iniciando libermarcadores: ", err);
+                   reject({error:err, msg:'Falta inicializar libermarcadores'});
                  });
              }
              else if (initFlag){
-               console.log("No ha ingresado usuario y contraseña.")
-               console.log("No se pudo iniciar libermarcadores")
+               console.log("No ha ingresado usuario y contraseña.");
+               console.log("No se pudo iniciar libermarcadores");
+               reject({msg:'Falta inicializar libermarcadores'});
+             }
+             else {
+              checkInit().
+              then(function(result) {
+                console.log(result);
+                resolve('Libermarcadores iniciado correctamente');
+              })
+              .catch(function(err) {
+                console.log("Error, es necesario inicializar libermarcadores");
+                console.log("No se pudo iniciar libermarcadores");
+                reject({error:err, msg:'Falta inicializar libermarcadores'});
+              })
              }
           }
          else {
@@ -42,19 +57,45 @@ module.exports.configBD = function(options) {
     });
 }
 
+//VERIFICO QUE LOS LIBERMARCADORES YA ESTÉN INICIALIZADOS
+//LO REALIZO VERIFICANDO QUE EXISTE UN ADMIN Y EL ESPACIO root
+function checkInit() {
+  return new Promise(function(resolve, reject) {
+      database.collection(colUsuarios)
+          .find({super:true}).toArray(function(err, result) {
+              if (err || result.length<1)
+                  reject('No existe admin')
+              else {
+                database.collection(colEspacios)
+                    .find({path:'root'}).toArray(function(err, result) {
+                        if (err || result.length!=1)
+                          reject('No existe espacio raíz')
+                        else
+                          resolve('OK');
+                    });
+              }
+          });
+  });
+}
+
 //INICIO LA BASE DE DATOS, NUEVAS BASES Y admin
-module.exports.initDB = function(admin) {
+function initDB (admin) {
     return new Promise(function(resolve, reject) {
       function init() {
         database.collection(colUsuarios)
-            .insert({username:admin.username,pass:admin.pass, super:true}, function(err,result) {
-                if (err)
-                    console.log("No puedo crearse admin");
-            });
-        database.collection(colEspacios)
-            .insert({path:'root', permisos:[{tipo:'admin', usuario:admin.username}]}, function(err,result) {
-                if (err)
-                    console.log("No puedo crearse admin");
+            .insert({username:admin.username, pass:admin.pass, super:true}, function(err,result) {
+                if (err) {
+                  reject({msg:'No pudo crearse admin', error:err});
+                }
+                else {
+                  database.collection(colEspacios)
+                      .insert({path:'root', permisos:[{tipo:'admin', usuario:admin.username}]}, function(err,result) {
+                          if (err)
+                              reject({msg:'No pudo crearse espacio raíz', error:err});
+                          else
+                              resolve({msg:'OK... libermarcadores INICIALIZADOS'});
+                      });
+                }
             });
       }
 
@@ -67,8 +108,8 @@ module.exports.initDB = function(admin) {
               }
           });
       }
-
-      init();
+      else
+        init();
     });
 }
 

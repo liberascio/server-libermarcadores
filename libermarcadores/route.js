@@ -1,20 +1,4 @@
 
-/*  ----------------- UTILS --------------------- */
-
-String.prototype.getPath = function() {
-    var espacios = this.split('/');
-    espacios = espacios.filter(function(esp) {
-        if (esp=='' || esp=='rest' || esp=='espacios' || esp=='marcadores')
-            return false;
-        else
-            return true;
-    });
-    var pathResult = "/";
-    espacios.forEach(function(esp) {
-       pathResult +=  esp + "/";
-    });
-    return pathResult;
-}
 
 
 /* --------------- ROUTER ------------*/
@@ -83,7 +67,7 @@ router.get('/web/espacios/:path', function(req,res) {
 });
 
 
-router.get('/js/:script', function(req,res) {
+router.get('/web/js/:script', function(req,res) {
     var script = req.params.script;
     var dirFile = path.join(__dirname, 'views', 'js', script);
     fs.stat(dirFile, function(err,stats){
